@@ -7,8 +7,39 @@
 
 import Foundation
 
-struct Task {
+struct Task: Codable {
+    let id: Int
     let title: String
     let description: String
-    let createdAt: Date = Date()
+    let createdAt: Date
+    let completed: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case description = "todo"
+        case completed
+    }
+
+    init(id: Int, description: String, completed: Bool) {
+        self.id = id
+        self.title = "Mock Title"
+        self.description = description
+        self.createdAt = Date()
+        self.completed = completed
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
+        description = try container.decode(String.self, forKey: .description)
+        completed = try container.decode(Bool.self, forKey: .completed)
+
+
+        title = "Mock Title"
+        createdAt = Date()
+    }
+}
+
+struct TodoWrapper: Codable {
+    let todos: [Task]
 }
