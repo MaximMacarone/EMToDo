@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
@@ -30,7 +30,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		91010CE52D9297A6005AE992 /* Exceptions for "EMToDo" folder in "EMToDo" target */ = {
+		91010CE52D9297A6005AE992 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -40,24 +40,9 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		91010CBC2D9297A4005AE992 /* EMToDo */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				91010CE52D9297A6005AE992 /* Exceptions for "EMToDo" folder in "EMToDo" target */,
-			);
-			path = EMToDo;
-			sourceTree = "<group>";
-		};
-		91010CD62D9297A6005AE992 /* EMToDoTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EMToDoTests;
-			sourceTree = "<group>";
-		};
-		91010CE02D9297A6005AE992 /* EMToDoUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EMToDoUITests;
-			sourceTree = "<group>";
-		};
+		91010CBC2D9297A4005AE992 /* EMToDo */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (91010CE52D9297A6005AE992 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = EMToDo; sourceTree = "<group>"; };
+		91010CD62D9297A6005AE992 /* EMToDoTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = EMToDoTests; sourceTree = "<group>"; };
+		91010CE02D9297A6005AE992 /* EMToDoUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = EMToDoUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,6 +185,7 @@
 				};
 			};
 			buildConfigurationList = 91010CB52D9297A4005AE992 /* Build configuration list for PBXProject "EMToDo" */;
+			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -208,7 +194,6 @@
 			);
 			mainGroup = 91010CB12D9297A4005AE992;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 91010CBB2D9297A4005AE992 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -294,7 +279,7 @@
 				INFOPLIST_FILE = EMToDo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -322,7 +307,7 @@
 				INFOPLIST_FILE = EMToDo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
