@@ -33,7 +33,7 @@
 		91010CE52D9297A6005AE992 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				Resources/Info.plist,
 			);
 			target = 91010CB92D9297A4005AE992 /* EMToDo */;
 		};
@@ -276,7 +276,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 82ZASH38NC;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = EMToDo/Info.plist;
+				INFOPLIST_FILE = EMToDo/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
@@ -304,7 +304,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 82ZASH38NC;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = EMToDo/Info.plist;
+				INFOPLIST_FILE = EMToDo/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
