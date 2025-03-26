@@ -6,5 +6,8 @@
 //
 
 protocol TaskListViewDescription {
+    var presenter: TaskListPresenterDescription? { get set }
     
+    func updateTableView(with tasks: [TodoTask])
+    func showError(message: String)
 }

@@ -9,6 +9,10 @@ import UIKit
 
 class TaskListViewController: UIViewController, TaskListViewDescription {
     
+    //MARK: - VIPER
+    
+    var presenter: (any TaskListPresenterDescription)?
+    
     //MARK: - Subviews
     
     let tableView = UITableView()
@@ -24,9 +28,10 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
     
     //MARK: - Private fields
     
-    private var tasks: [Task] = [] {
+    private var tasks: [TodoTask] = [] {
         didSet {
             DispatchQueue.main.async { [weak self] in
+                self?.tableView.reloadData()
                 self?.updateTaskCountLabel()
             }
         }
@@ -43,7 +48,7 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         setupBottomToolbar()
         setupSearchController()
         
-        fetchTasks()
+        loadTasks()
     }
     
     //MARK: - UI Setup
@@ -79,7 +84,7 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
     private func setupBottomToolbar() {
         navigationController?.setToolbarHidden(false, animated: true)
         
-        let newTaskButton = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: nil)
+        let newTaskButton = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(didTapNewTask))
         let taskCountItem = UIBarButtonItem(title: nil, image: nil, target: self, action: nil)
         
         taskCountLabel.text = tasks.count.tasksCountString()
@@ -112,28 +117,31 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         taskCountLabel.text = tasks.count.tasksCountString()
     }
     
-    func fetchTasks() {
-        APIService.shared.fetchTasks { [weak self] result in
-            guard let self else { return }
-            
-            switch result {
-            case .success(let tasks):
-                self.tasks = tasks
-                print(tasks)
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            case .failure(let error):
-                print(error)
-            }
-        }
+    @objc private func didTapNewTask() {
+        presenter?.addNewTask()
+    }
+    
+    func updateTableView(with tasks: [TodoTask]) {
+        self.tasks = tasks
+    }
+    
+    func showError(message: String) {
+        let alert = UIAlertController(title: "Error occured", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        
+        present(alert, animated: true)
+    }
+    
+    private func loadTasks() {
+        presenter?.fetchTasks()
     }
 }
 
 extension TaskListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        navigationController?.pushViewController(TaskDetailViewController(), animated: true)
+        
+        presenter?.didSelectTask(tasks[indexPath.row])
     }
 }
 
@@ -144,10 +152,11 @@ extension TaskListViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TaskTableViewCell.identifier, for: indexPath) as? TaskTableViewCell else {
-            fatalError()
+            return UITableViewCell()
         }
         
         cell.delegate = self
+        cell.contextMenuDelegate = self
         cell.configure(with: tasks[indexPath.row])
         
         return cell
@@ -167,10 +176,38 @@ extension TaskListViewController: TaskTableViewCellDelegate {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
         
         var task = tasks[indexPath.row]
-        print("didTap")
         task.completed.toggle()
         tasks[indexPath.row] = task
         
         tableView.reloadRows(at: [indexPath], with: .automatic)
     }
+}
+
+extension TaskListViewController: TaskCellContextMenuDelegate {
+    func didSelectEdit(for cell: TaskTableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        let task = tasks[indexPath.row]
+        
+        presenter?.didSelectTask(task)
+    }
+    
+    func didSelectShare(for cell: TaskTableViewCell) {
+        // Share logic
+    }
+    
+    func didSelectDelete(for cell: TaskTableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        let task = tasks[indexPath.row]
+        
+        let alert = UIAlertController(title: "Удалить задачу?", message: nil, preferredStyle: .actionSheet)
+        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+            guard let self else { return }
+            self.presenter?.deleteTask(task)
+        }
+        alert.addAction(deleteAction)
+        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+        
+        present(alert, animated: true)
+    }
+    
 }

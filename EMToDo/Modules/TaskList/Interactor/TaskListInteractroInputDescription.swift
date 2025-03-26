@@ -6,5 +6,10 @@
 //
 
 protocol TaskListInteractroInputDescription {
+    var presenter: TaskListInteractorOutputDescription? { get set }
     
+    func fetchTasks()
+    func fetchTasksLocal()
+    func removeTask(_ task: TodoTask)
+    func toggleCompleted(_ task: TodoTask)
 }

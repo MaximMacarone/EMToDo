@@ -11,6 +11,11 @@ protocol TaskTableViewCellDelegate: AnyObject {
     func didTapCheckbox(for cell: TaskTableViewCell)
 }
 
+protocol TaskCellContextMenuDelegate: AnyObject {
+    func didSelectEdit(for cell: TaskTableViewCell)
+    func didSelectShare(for cell: TaskTableViewCell)
+    func didSelectDelete(for cell: TaskTableViewCell)
+}
 
 class TaskTableViewCell: UITableViewCell {
     
@@ -19,6 +24,7 @@ class TaskTableViewCell: UITableViewCell {
     //MARK: - Properties
     
     weak var delegate: TaskTableViewCellDelegate?
+    weak var contextMenuDelegate: TaskCellContextMenuDelegate?
     
     //MARK: - Subviews
     
@@ -60,6 +66,22 @@ class TaskTableViewCell: UITableViewCell {
         return label
     }()
     
+    //MARK: - Init
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        setupCheckboxButtonTarget()
+        
+        let interaction = UIContextMenuInteraction(delegate: self)
+        addInteraction(interaction)
+        
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     //MARK: - UI Setup
     
     private func setupUI() {
@@ -100,17 +122,13 @@ class TaskTableViewCell: UITableViewCell {
     
     //MARK: - Methods
     
-    func configure(with task: Task) {
+    func configure(with task: TodoTask) {
         descriptionLabel.text = task.description
         dateLabel.text = task.createdAt.formatted()
         
         titleLabel.attributedText = nil
         
         setupUI()
-        setupCheckboxButtonTarget()
-        
-        let interaction = UIContextMenuInteraction(delegate: self)
-        addInteraction(interaction)
         
         configureCompletionState(with: task)
     }
@@ -162,7 +180,7 @@ class TaskTableViewCell: UITableViewCell {
         return previewVC
     }
     
-    private func configureCompletionState(with task: Task) {
+    private func configureCompletionState(with task: TodoTask) {
         if task.completed {
             checkBoxButton.setImage(UIImage(systemName: "checkmark.circle"), for: .normal)
             checkBoxButton.tintColor = .accent
@@ -200,12 +218,14 @@ extension TaskTableViewCell: UIContextMenuInteractionDelegate {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: makePreview) { [weak self] _ -> UIMenu? in
             
             // Menu actions
-            let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "square.and.pencil"), identifier: nil, discoverabilityTitle: nil) { _ in
-                
+            let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "square.and.pencil"), identifier: nil, discoverabilityTitle: nil) { [weak self] _ in
+                self?.contextMenuDelegate?.didSelectEdit(for: self!)
             }
-            let shareAction = UIAction(title: "Поделиться", image: UIImage(systemName: "square.and.arrow.up"), identifier: nil, discoverabilityTitle: nil) { _ in }
-            let deleteAction = UIAction(title: "Удалить", image: UIImage(systemName: "trash"), identifier: nil, discoverabilityTitle: nil, attributes: .destructive) { action in
-                
+            let shareAction = UIAction(title: "Поделиться", image: UIImage(systemName: "square.and.arrow.up"), identifier: nil, discoverabilityTitle: nil) { [weak self] _ in
+                self?.contextMenuDelegate?.didSelectShare(for: self!)
+            }
+            let deleteAction = UIAction(title: "Удалить", image: UIImage(systemName: "trash"), identifier: nil, discoverabilityTitle: nil, attributes: .destructive) { [weak self] _ in
+                self?.contextMenuDelegate?.didSelectDelete(for: self!)
             }
             
             return UIMenu(children: [editAction, shareAction, deleteAction])

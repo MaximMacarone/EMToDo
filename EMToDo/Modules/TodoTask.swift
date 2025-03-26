@@ -1,5 +1,5 @@
 //
-//  Task.swift
+//  TodoTask.swift
 //  EMToDo
 //
 //  Created by Maxim Makarenkov on 25.03.2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Task: Codable {
+struct TodoTask: Codable {
     let id: Int
     var title: String
     var description: String
@@ -20,7 +20,11 @@ struct Task: Codable {
         case completed
     }
 
-    init(id: Int, description: String, completed: Bool) {
+    init(
+        id: Int = UUID().hashValue,
+        description: String = "",
+        completed: Bool = false
+    ) {
         self.id = id
         self.title = "Mock Title"
         self.description = description
@@ -41,5 +45,5 @@ struct Task: Codable {
 }
 
 struct TodoWrapper: Codable {
-    let todos: [Task]
+    let todos: [TodoTask]
 }

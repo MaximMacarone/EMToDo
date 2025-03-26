@@ -17,9 +17,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         
         // TODO: Temp
-        let navigationController = UINavigationController(rootViewController: TaskListViewController())
+        let taskListVC = TaskListRouter.start()
         
-        window?.rootViewController = navigationController
+        window?.rootViewController = taskListVC
         window?.makeKeyAndVisible()
     }
 

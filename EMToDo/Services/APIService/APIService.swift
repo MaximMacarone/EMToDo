@@ -12,7 +12,7 @@ final class APIService: APIServiceDescription {
     
     static let shared = APIService()
     
-    func fetchTasks(completion: @escaping (Result<[Task], APIError>) -> Void) {
+    func fetchTasks(completion: @escaping (Result<[TodoTask], APIError>) -> Void) {
         guard let url = URL(string: "https://dummyjson.com/todos") else {
             completion(.failure(.badURL))
             return

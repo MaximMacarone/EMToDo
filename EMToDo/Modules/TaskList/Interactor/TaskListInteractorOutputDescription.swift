@@ -6,5 +6,9 @@
 //
 
 protocol TaskListInteractorOutputDescription {
-    
+    func didAddNewTask()
+    func didRemoveTask()
+    func didFetchTasks(_ tasks: [TodoTask])
+    func didReceiveError(_ message: String)
+    func didToggleCompleted(_ task: TodoTask)
 }

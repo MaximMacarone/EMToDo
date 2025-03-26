@@ -14,6 +14,6 @@ enum APIError: Error {
 }
 
 protocol APIServiceDescription {
-    func fetchTasks(completion: @escaping (Result<[Task], APIError>) -> Void)
+    func fetchTasks(completion: @escaping (Result<[TodoTask], APIError>) -> Void)
     
 }
