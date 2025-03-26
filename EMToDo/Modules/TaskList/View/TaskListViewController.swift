@@ -174,8 +174,10 @@ extension TaskListViewController: UISearchBarDelegate, UISearchResultsUpdating {
 extension TaskListViewController: TaskTableViewCellDelegate {
     func didTapCheckbox(for cell: TaskTableViewCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        
         var task = tasks[indexPath.row]
+        
+        presenter?.toggleCompleted(task)
+
         task.completed.toggle()
         tasks[indexPath.row] = task
         

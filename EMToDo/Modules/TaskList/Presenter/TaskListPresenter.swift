@@ -43,11 +43,11 @@ final class TaskListPresenter: TaskListPresenterDescription {
 
 extension TaskListPresenter: TaskListInteractorOutputDescription {
     func didAddNewTask() {
-        interactor?.fetchTasksLocal()
+        interactor?.fetchTasks()
     }
     
     func didRemoveTask() {
-        interactor?.fetchTasksLocal()
+        interactor?.fetchTasks()
     }
     
     func didFetchTasks(_ tasks: [TodoTask]) {
