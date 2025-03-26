@@ -11,14 +11,14 @@ final class TaskListRouter: TaskListRouterDescription {
     static func start() -> UIViewController {
         let taskListVC = TaskListViewController()
         let taskListRouter = TaskListRouter()
-        var taskListPresenter: TaskListPresenterDescription & TaskListInteractorOutputDescription = TaskListPresenter()
-        var taskListInteractor: TaskListInteractroInputDescription = TaskListInteractor()
-        
-        taskListVC.presenter = taskListPresenter
+        let taskListPresenter: TaskListPresenterDescription & TaskListInteractorOutputDescription = TaskListPresenter()
+        let taskListInteractor: TaskListInteractroInputDescription = TaskListInteractor()
         
         taskListPresenter.interactor = taskListInteractor
         taskListPresenter.router = taskListRouter
         taskListPresenter.view = taskListVC
+        
+        taskListVC.presenter = taskListPresenter
         
         taskListInteractor.presenter = taskListPresenter
         
@@ -26,6 +26,13 @@ final class TaskListRouter: TaskListRouterDescription {
     }
     
     func presentTaskDetail(on view: any TaskListViewDescription, for task: TodoTask) {
-        print("presenting detail view for task: \(task)")
+        let detailVC = TaskDetailRouter.start(with: task)
+        
+        guard let viewVC = view as? UIViewController else {
+            fatalError("Failed to navigate to task detail view")
+        }
+        
+        viewVC.navigationController?.pushViewController(detailVC, animated: true)
+        
     }
 }

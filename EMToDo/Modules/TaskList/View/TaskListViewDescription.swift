@@ -5,7 +5,7 @@
 //  Created by Maxim Makarenkov on 25.03.2025.
 //
 
-protocol TaskListViewDescription {
+protocol TaskListViewDescription: AnyObject {
     var presenter: TaskListPresenterDescription? { get set }
     
     func updateTableView(with tasks: [TodoTask])

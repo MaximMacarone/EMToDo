@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol TaskListRouterDescription {
+protocol TaskListRouterDescription: AnyObject {
     static func start() -> UIViewController
     
     func presentTaskDetail(on view: TaskListViewDescription, for task: TodoTask)
