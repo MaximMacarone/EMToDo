@@ -5,7 +5,7 @@
 //  Created by Maxim Makarenkov on 25.03.2025.
 //
 
-protocol TaskListPresenterDescription {
+protocol TaskListPresenterDescription: AnyObject {
     var interactor: TaskListInteractroInputDescription? { get set }
     var router: TaskListRouterDescription? { get set }
     var view: TaskListViewDescription? { get set }
