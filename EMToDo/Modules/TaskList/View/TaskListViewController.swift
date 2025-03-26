@@ -13,9 +13,24 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
     
     let tableView = UITableView()
     
+    let taskCountLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .footnote)
+        label.textColor = .label
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
     //MARK: - Private fields
     
-    private var tasks: [Task] = []
+    private var tasks: [Task] = [] {
+        didSet {
+            DispatchQueue.main.async { [weak self] in
+                self?.updateTaskCountLabel()
+            }
+        }
+    }
     
     //MARK: - Lifecycle
 
@@ -42,6 +57,7 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
     private func setupNavBar() {
         title = "Задачи"
         navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
     }
     
     private func setupTableView() {
@@ -52,27 +68,26 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
         ])
+
     }
     
     private func setupBottomToolbar() {
         navigationController?.setToolbarHidden(false, animated: true)
         
         let newTaskButton = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: nil)
-        let taskCountLabel = UIBarButtonItem(title: nil, image: nil, target: self, action: nil)
+        let taskCountItem = UIBarButtonItem(title: nil, image: nil, target: self, action: nil)
         
-        let label = UILabel()
-        label.text = "\(tasks.count) задач"
-        label.font = .preferredFont(forTextStyle: .footnote)
-        taskCountLabel.customView = label
+        taskCountLabel.text = tasks.count.tasksCountString()
+        taskCountItem.customView = self.taskCountLabel
         
         toolbarItems = [
             .flexibleSpace(),
-            taskCountLabel,
+            taskCountItem,
             .flexibleSpace(),
             newTaskButton
         ]
@@ -89,6 +104,12 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         searchController.searchBar.autocorrectionType = .no
         
         navigationItem.searchController = searchController
+    }
+    
+    //MARK: - Methods
+    
+    private func updateTaskCountLabel() {
+        taskCountLabel.text = tasks.count.tasksCountString()
     }
     
     func fetchTasks() {
@@ -110,7 +131,10 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
 }
 
 extension TaskListViewController: UITableViewDelegate {
-    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        navigationController?.pushViewController(TaskDetailViewController(), animated: true)
+    }
 }
 
 extension TaskListViewController: UITableViewDataSource {
@@ -123,6 +147,7 @@ extension TaskListViewController: UITableViewDataSource {
             fatalError()
         }
         
+        cell.delegate = self
         cell.configure(with: tasks[indexPath.row])
         
         return cell
@@ -135,4 +160,17 @@ extension TaskListViewController: UISearchBarDelegate, UISearchResultsUpdating {
     }
     
     
+}
+
+extension TaskListViewController: TaskTableViewCellDelegate {
+    func didTapCheckbox(for cell: TaskTableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        
+        var task = tasks[indexPath.row]
+        print("didTap")
+        task.completed.toggle()
+        tasks[indexPath.row] = task
+        
+        tableView.reloadRows(at: [indexPath], with: .automatic)
+    }
 }

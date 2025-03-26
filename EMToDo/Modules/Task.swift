@@ -9,10 +9,10 @@ import Foundation
 
 struct Task: Codable {
     let id: Int
-    let title: String
-    let description: String
+    var title: String
+    var description: String
     let createdAt: Date
-    let completed: Bool
+    var completed: Bool
 
     enum CodingKeys: String, CodingKey {
         case id

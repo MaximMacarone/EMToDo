@@ -7,15 +7,25 @@
 
 import UIKit
 
+protocol TaskTableViewCellDelegate: AnyObject {
+    func didTapCheckbox(for cell: TaskTableViewCell)
+}
+
+
 class TaskTableViewCell: UITableViewCell {
     
     static let identifier: String = "taskCell"
     
+    //MARK: - Properties
+    
+    weak var delegate: TaskTableViewCellDelegate?
+    
     //MARK: - Subviews
     
-    private let checkBoxButton: UIButton = {
+    let checkBoxButton: UIButton = {
         let button = UIButton(type: .custom)
-        button.setImage(UIImage(systemName: "checkmark.circle"), for: .normal)
+        button.setImage(UIImage(systemName: "circle"), for: .normal)
+        button.tintColor = .secondaryLabel
         button.imageView?.contentMode = .scaleAspectFit
         
         var configuration = UIButton.Configuration.plain()
@@ -49,20 +59,6 @@ class TaskTableViewCell: UITableViewCell {
         label.textColor = .secondaryLabel
         return label
     }()
-    
-    //MARK: - Init
-
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupUI()
-        
-        let interaction = UIContextMenuInteraction(delegate: self)
-        addInteraction(interaction)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     
     //MARK: - UI Setup
     
@@ -98,33 +94,25 @@ class TaskTableViewCell: UITableViewCell {
         ])
     }
     
+    private func setupCheckboxButtonTarget() {
+        checkBoxButton.addTarget(self, action: #selector(didTapCheckbox), for: .touchUpInside)
+    }
+    
     //MARK: - Methods
     
     func configure(with task: Task) {
-        titleLabel.text = task.title
         descriptionLabel.text = task.description
         dateLabel.text = task.createdAt.formatted()
         
-//        if task.completed {
-//            checkBoxImage.image = UIImage(systemName: "checkmark.circle", withConfiguration: UIImage.SymbolConfiguration(pointSize: 24, weight: .thin))
-//            checkBoxImage.tintColor = .accent
-//            
-//            titleLabel.textColor = .secondaryLabel
-//            descriptionLabel.textColor = .secondaryLabel
-//            
-//            titleLabel.attributedText = NSAttributedString(
-//                string: task.title,
-//                attributes: [.strikethroughStyle: NSUnderlineStyle.single.rawValue]
-//            )
-//        } else {
-//            checkBoxImage.image = UIImage(systemName: "circle")
-//            checkBoxImage.tintColor = .secondaryLabel
-//            titleLabel.textColor = .label
-//            descriptionLabel.textColor = .label
-//            
-//            titleLabel.attributedText = nil
-//            titleLabel.text = task.title
-//        }
+        titleLabel.attributedText = nil
+        
+        setupUI()
+        setupCheckboxButtonTarget()
+        
+        let interaction = UIContextMenuInteraction(delegate: self)
+        addInteraction(interaction)
+        
+        configureCompletionState(with: task)
     }
     
     private func makePreview() -> UIViewController {
@@ -172,6 +160,36 @@ class TaskTableViewCell: UITableViewCell {
         previewVC.preferredContentSize = CGSize(width: contentView.frame.width, height: contentView.frame.height)
         
         return previewVC
+    }
+    
+    private func configureCompletionState(with task: Task) {
+        if task.completed {
+            checkBoxButton.setImage(UIImage(systemName: "checkmark.circle"), for: .normal)
+            checkBoxButton.tintColor = .accent
+            
+            titleLabel.textColor = .secondaryLabel
+            descriptionLabel.textColor = .secondaryLabel
+            
+            titleLabel.attributedText = NSAttributedString(
+                string: task.title,
+                attributes: [.strikethroughStyle: NSUnderlineStyle.single.rawValue]
+            )
+        } else {
+            checkBoxButton.setImage(UIImage(systemName: "circle"), for: .normal)
+            checkBoxButton.tintColor = .secondaryLabel
+            
+            titleLabel.textColor = .label
+            descriptionLabel.textColor = .label
+            
+            titleLabel.attributedText = NSAttributedString(
+                string: task.title
+            )
+
+        }
+    }
+    
+    @objc private func didTapCheckbox() {
+        delegate?.didTapCheckbox(for: self)
     }
     
 }
