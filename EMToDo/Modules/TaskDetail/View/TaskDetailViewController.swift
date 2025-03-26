@@ -7,11 +7,15 @@
 
 import UIKit
 
-class TaskDetailViewController: UIViewController {
+class TaskDetailViewController: UIViewController, TaskDetailViewDescription {
+    
+    //MARK: - VIPER
+    
+    var presenter: (any TaskDetailPresenterDescription)?
     
     //MARK: - Subviews
     
-    let titleTextView: UITextView = {
+    private let titleTextView: UITextView = {
         let textView = UITextView()
         textView.font = .systemFont(ofSize: 34, weight: .bold)
         textView.textColor = .label
@@ -19,29 +23,25 @@ class TaskDetailViewController: UIViewController {
         textView.isScrollEnabled = false
         textView.textContainerInset = .zero
         textView.textContainer.lineFragmentPadding = 0
-        textView.text = "Buy milk"
+        
         return textView
     }()
     
-    let dateLabel: UILabel = {
+    private let dateLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .caption1)
         label.textColor = .secondaryLabel
         
-        label.text = "02/10/24"
-        
         return label
     }()
     
-    let descriptionTextView: UITextView = {
+    private let descriptionTextView: UITextView = {
         let textView = UITextView()
         textView.font = .systemFont(ofSize: 16, weight: .regular)
         textView.textColor = .label
         textView.backgroundColor = .clear
-        textView.isScrollEnabled = false
         textView.textContainerInset = .zero
         textView.textContainer.lineFragmentPadding = 0
-        textView.text = "Составить список необходимых продуктов для ужина. Не забыть проверить, что уже есть в холодильнике."
         return textView
     }()
     
@@ -52,7 +52,28 @@ class TaskDetailViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         setupUI()
+        presenter?.setup()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        navigationController?.setToolbarHidden(true, animated: true)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        navigationController?.setToolbarHidden(false, animated: true)
+        
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    //MARK: - UI setup
     
     private func setupUI() {
         
@@ -78,7 +99,34 @@ class TaskDetailViewController: UIViewController {
             descriptionTextView.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 16),
             descriptionTextView.leadingAnchor.constraint(equalTo: titleTextView.leadingAnchor),
             descriptionTextView.trailingAnchor.constraint(equalTo: titleTextView.trailingAnchor),
+            descriptionTextView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor)
         ])
     }
+    
+    //MARK: - Methods
+    
+    func setupTask(_ task: TodoTask) {
+        titleTextView.text = task.title
+        dateLabel.text = task.createdAt.formatted()
+        descriptionTextView.text = task.description
+    }
+    
+    @objc private func keyboardWillShow(notification: Notification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            let keyboardHeight = keyboardFrame.height
+            
+            descriptionTextView.contentInset.bottom = keyboardHeight
+            descriptionTextView.verticalScrollIndicatorInsets.bottom = keyboardHeight
+            
+            
+            let selectedRange = descriptionTextView.selectedRange
+            descriptionTextView.scrollRangeToVisible(selectedRange)
+        }
+    }
 
+    @objc private func keyboardWillHide(notification: Notification) {
+        
+        descriptionTextView.contentInset.bottom = 0
+        descriptionTextView.verticalScrollIndicatorInsets.bottom = 0
+    }
 }

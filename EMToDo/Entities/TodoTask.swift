@@ -22,11 +22,12 @@ struct TodoTask: Codable {
 
     init(
         id: Int = UUID().hashValue,
+        title: String = "Mock title",
         description: String = "",
         completed: Bool = false
     ) {
         self.id = id
-        self.title = "Mock Title"
+        self.title = title
         self.description = description
         self.createdAt = Date()
         self.completed = completed
@@ -37,8 +38,6 @@ struct TodoTask: Codable {
         id = try container.decode(Int.self, forKey: .id)
         description = try container.decode(String.self, forKey: .description)
         completed = try container.decode(Bool.self, forKey: .completed)
-
-
         title = "Mock Title"
         createdAt = Date()
     }

@@ -5,11 +5,10 @@
 //  Created by Maxim Makarenkov on 25.03.2025.
 //
 
-protocol TaskListInteractroInputDescription {
+protocol TaskListInteractroInputDescription: AnyObject {
     var presenter: TaskListInteractorOutputDescription? { get set }
     
     func fetchTasks()
-    func fetchTasksLocal()
     func removeTask(_ task: TodoTask)
     func toggleCompleted(_ task: TodoTask)
 }

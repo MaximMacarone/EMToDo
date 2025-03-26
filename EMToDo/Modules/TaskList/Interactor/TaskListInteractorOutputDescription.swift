@@ -5,7 +5,7 @@
 //  Created by Maxim Makarenkov on 25.03.2025.
 //
 
-protocol TaskListInteractorOutputDescription {
+protocol TaskListInteractorOutputDescription: AnyObject {
     func didAddNewTask()
     func didRemoveTask()
     func didFetchTasks(_ tasks: [TodoTask])
