@@ -71,6 +71,7 @@ class TaskTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
+        setupUI()
         setupCheckboxButtonTarget()
         
         let interaction = UIContextMenuInteraction(delegate: self)
@@ -127,8 +128,6 @@ class TaskTableViewCell: UITableViewCell {
         dateLabel.text = task.createdAt.formatted()
         
         titleLabel.attributedText = nil
-        
-        setupUI()
         
         configureCompletionState(with: task)
     }

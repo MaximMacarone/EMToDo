@@ -23,9 +23,7 @@ final class TaskListPresenter: TaskListPresenterDescription {
     }
     
     func addNewTask() {
-        guard let view else { return }
-        
-        router?.presentTaskDetail(on: view, for: TodoTask())
+        interactor?.addNewTask()
     }
     
     func deleteTask(_ task: TodoTask) {
@@ -42,8 +40,10 @@ final class TaskListPresenter: TaskListPresenterDescription {
 }
 
 extension TaskListPresenter: TaskListInteractorOutputDescription {
-    func didAddNewTask() {
-        interactor?.fetchTasks()
+    func didAddNewTask(_ task: TodoTask) {
+        guard let view else { return }
+        
+        router?.presentTaskDetail(on: view, for: task)
     }
     
     func didRemoveTask() {
@@ -51,7 +51,7 @@ extension TaskListPresenter: TaskListInteractorOutputDescription {
     }
     
     func didFetchTasks(_ tasks: [TodoTask]) {
-        view?.updateTableView(with: tasks)
+        view?.updateTasks(with: tasks)
     }
     
     func didReceiveError(_ message: String) {
@@ -59,7 +59,7 @@ extension TaskListPresenter: TaskListInteractorOutputDescription {
     }
     
     func didToggleCompleted(_ task: TodoTask) {
-        
+        view?.toggleCompleted(task)
     }
     
     

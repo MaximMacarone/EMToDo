@@ -26,15 +26,20 @@ final class CoreDataStack {
         return persistentContainer.viewContext
     }
     
+    lazy var backgroundContext: NSManagedObjectContext = {
+        let context = persistentContainer.newBackgroundContext()
+        context.automaticallyMergesChangesFromParent = true
+        return context
+    }()
+    
     func performBackgroundTask(_ block: @escaping (NSManagedObjectContext) -> Void) {
-        persistentContainer.performBackgroundTask { context in
-            block(context)
-            do {
-                try context.save()
+        backgroundContext.perform {
+            block(self.backgroundContext)
+            do {	
+                try self.backgroundContext.save()
             } catch {
-                print(error.localizedDescription)
+                print("Error saving background context: \(error.localizedDescription)")
             }
-            
         }
     }
 

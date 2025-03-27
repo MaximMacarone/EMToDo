@@ -8,6 +8,7 @@
 protocol TaskListViewDescription: AnyObject {
     var presenter: TaskListPresenterDescription? { get set }
     
-    func updateTableView(with tasks: [TodoTask])
+    func updateTasks(with tasks: [TodoTask])
+    func toggleCompleted(_ task: TodoTask)
     func showError(message: String)
 }

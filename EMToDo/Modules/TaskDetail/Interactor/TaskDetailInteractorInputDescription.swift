@@ -6,7 +6,7 @@
 //
 
 protocol TaskDetailInteractorInputDescription: AnyObject {
-    var presenter: TaskDetailPresenterDescription? { get set }
+    var presenter: TaskDetailInteractorOutputDescription? { get set }
     var todoTask: TodoTask? { get set }
     
     func fetchTask() -> TodoTask

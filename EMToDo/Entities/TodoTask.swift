@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TodoTask: Codable {
+struct TodoTask: Codable, Hashable {
     let id: Int
     var title: String
     var description: String
@@ -21,6 +21,8 @@ struct TodoTask: Codable {
     }
 
     init(
+        // Не лучший способ делать ID, но сделано как временное решение из
+        // соображений того, что на "сервере" ID хранятся как int
         id: Int = UUID().hashValue,
         title: String = "Mock title",
         description: String = "",
@@ -41,6 +43,14 @@ struct TodoTask: Codable {
         title = "Mock Title"
         createdAt = Date()
     }
+    
+//    static func == (lhs: TodoTask, rhs: TodoTask) -> Bool {
+//        return lhs.id == rhs.id
+//    }
+//
+//    func hash(into hasher: inout Hasher) {
+//        hasher.combine(id)
+//    }
 }
 
 struct TodoWrapper: Codable {

@@ -13,7 +13,6 @@ final class TaskListInteractor: TaskListInteractroInputDescription {
     
     var presenter: (any TaskListInteractorOutputDescription)?
 
-    
     //MARK: - Methods
     
     func fetchTasks() {
@@ -25,12 +24,9 @@ final class TaskListInteractor: TaskListInteractroInputDescription {
             do {
                 let localTasks = try context.fetch(fetchRequest)
                 if localTasks.isEmpty {
-                    DispatchQueue.main.async {
-                        self.fetchTasksFromRemote()
-                    }
+                    self.fetchTasksFromRemote()
                 } else {
                     let tasks = localTasks.map { $0.toTodoTask() }
-                    
                     DispatchQueue.main.async {
                         self.presenter?.didFetchTasks(tasks)
                     }
@@ -51,9 +47,13 @@ final class TaskListInteractor: TaskListInteractroInputDescription {
             switch result {
             case .success(let tasks):
                 self.saveTasksToLocal(tasks)
-                self.presenter?.didFetchTasks(tasks)
+                DispatchQueue.main.async {
+                    self.presenter?.didFetchTasks(tasks)
+                }
             case .failure(let error):
-                self.presenter?.didReceiveError(error.localizedDescription)
+                DispatchQueue.main.async {
+                    self.presenter?.didReceiveError(error.localizedDescription)
+                }
             }
         }
     }
@@ -62,11 +62,13 @@ final class TaskListInteractor: TaskListInteractroInputDescription {
         CoreDataStack.shared.performBackgroundTask { [weak self] context in
             guard let self else { return }
             let fetchRequest: NSFetchRequest<LocalTodoTask> = LocalTodoTask.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id == %d", task.id)
+            fetchRequest.predicate = NSPredicate(format: "id == %lld", task.id)
             do {
                 let results = try context.fetch(fetchRequest)
                 if let localTask = results.first {
                     context.delete(localTask)
+                    
+                    try? context.save()
                     
                     DispatchQueue.main.async {
                         self.presenter?.didRemoveTask()
@@ -81,23 +83,64 @@ final class TaskListInteractor: TaskListInteractroInputDescription {
     func toggleCompleted(_ task: TodoTask) {
         CoreDataStack.shared.performBackgroundTask { [weak self] context in
             guard let self else { return }
+            
             let fetchRequest: NSFetchRequest<LocalTodoTask> = LocalTodoTask.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id == %d", task.id)
+            fetchRequest.predicate = NSPredicate(format: "id == %lld", Int64(task.id))
             
             do {
                 let results = try context.fetch(fetchRequest)
-                if let localTask = results.first {
-                    localTask.completed.toggle()
+                guard let localTask = results.first else {
+                    return
+                }
+
+                localTask.completed.toggle()
+
+                do {
+                    try context.save()
+                    
+                    let updatedTask = localTask.toTodoTask()
                     
                     DispatchQueue.main.async {
-                        self.presenter?.didToggleCompleted(localTask.toTodoTask())
+                        self.presenter?.didToggleCompleted(updatedTask)
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        self.presenter?.didReceiveError("Failed to save task update")
                     }
                 }
             } catch {
-                presenter?.didReceiveError(error.localizedDescription)
+                DispatchQueue.main.async {
+                    self.presenter?.didReceiveError("Failed to fetch task")
+                }
             }
         }
-
+    }
+    
+    func addNewTask() {
+        CoreDataStack.shared.performBackgroundTask { [weak self] context in
+            guard let self else { return }
+            
+            let newLocalTask = LocalTodoTask(context: context)
+            newLocalTask.id = Int64(UUID().hashValue)
+            newLocalTask.title = "New task"
+            newLocalTask.createdAt = Date()
+            newLocalTask.content = ""
+            newLocalTask.completed = false
+            
+            do {
+                try context.save()
+                
+                let newTask = newLocalTask.toTodoTask()
+                
+                DispatchQueue.main.async {
+                    self.presenter?.didAddNewTask(newTask)
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.presenter?.didReceiveError(error.localizedDescription)
+                }
+            }
+        }
     }
     
     private func saveTasksToLocal(_ tasks: [TodoTask]) {
@@ -110,6 +153,7 @@ final class TaskListInteractor: TaskListInteractroInputDescription {
                 localTask.content = task.description
                 localTask.completed = task.completed
             }
+            try? context.save()
         }
     }
 }
