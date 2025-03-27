@@ -12,7 +12,7 @@ final class TaskDetailRouter: TaskDetailRouterDescription {
         let detailVC = TaskDetailViewController()
         
         let presenter = TaskDetailPresenter()
-        let interactor = TaskDetailInteractor()
+        let interactor = TaskDetailInteractor(dataStore: TaskDataStore.shared)
         let router = TaskDetailRouter()
         
         detailVC.presenter = presenter

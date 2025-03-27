@@ -11,6 +11,7 @@ final class APIService: APIServiceDescription {
     private init() {}
     
     static let shared = APIService()
+    var urlSession: URLSession = .shared
     
     func fetchTasks(completion: @escaping (Result<[TodoTask], APIError>) -> Void) {
         guard let url = URL(string: "https://dummyjson.com/todos") else {
@@ -18,9 +19,9 @@ final class APIService: APIServiceDescription {
             return
         }
         
-        let dataTask = URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                completion(.failure(.fetchError(error.localizedDescription)))
+        let dataTask = urlSession.dataTask(with: url) { data, response, error in
+            if error != nil {
+                completion(.failure(.fetchError))
                 return
             }
             

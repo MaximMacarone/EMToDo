@@ -7,35 +7,30 @@
 
 import CoreData
 
-final class TaskListInteractor: TaskListInteractroInputDescription {
+final class TaskListInteractor: TaskListInteractorInputDescription {
     
     //MARK: - VIPER
     
     var presenter: (any TaskListInteractorOutputDescription)?
+    
+    //MARK: - Properties
+    
+    private let dataStorage: DataStoreDescription
+    
+    init(dataStorage: DataStoreDescription) {
+        self.dataStorage = dataStorage
+    }
 
     //MARK: - Methods
     
     func fetchTasks() {
-        CoreDataStack.shared.performBackgroundTask { [weak self] context in
+        dataStorage.fetchTasks { [weak self] result in
             guard let self else { return }
-            
-            let fetchRequest: NSFetchRequest<LocalTodoTask> = LocalTodoTask.fetchRequest()
-            
-            do {
-                let localTasks = try context.fetch(fetchRequest)
-                if localTasks.isEmpty {
-                    self.fetchTasksFromRemote()
-                } else {
-                    let tasks = localTasks.map { $0.toTodoTask() }
-                    DispatchQueue.main.async {
-                        self.presenter?.didFetchTasks(tasks)
-                    }
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    print(error.localizedDescription)
-                    self.presenter?.didReceiveError(error.localizedDescription)
-                }
+            switch result {
+            case .success(let tasks):
+                self.presenter?.didFetchTasks(tasks)
+            case .failure(let error):
+                self.presenter?.didReceiveError(error.localizedDescription)
             }
         }
     }
@@ -59,86 +54,34 @@ final class TaskListInteractor: TaskListInteractroInputDescription {
     }
     
     func removeTask(_ task: TodoTask) {
-        CoreDataStack.shared.performBackgroundTask { [weak self] context in
-            guard let self else { return }
-            let fetchRequest: NSFetchRequest<LocalTodoTask> = LocalTodoTask.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id == %lld", task.id)
-            do {
-                let results = try context.fetch(fetchRequest)
-                if let localTask = results.first {
-                    context.delete(localTask)
-                    
-                    try? context.save()
-                    
-                    DispatchQueue.main.async {
-                        self.presenter?.didRemoveTask()
-                    }
-                }
-            } catch {
-                self.presenter?.didReceiveError(error.localizedDescription)
+        dataStorage.removeTask(task) { [weak self] result in
+            switch result {
+            case .success():
+                self?.presenter?.didRemoveTask()
+            case .failure(let error):
+                self?.presenter?.didReceiveError(error.localizedDescription)
             }
         }
     }
     
     func toggleCompleted(_ task: TodoTask) {
-        CoreDataStack.shared.performBackgroundTask { [weak self] context in
-            guard let self else { return }
-            
-            let fetchRequest: NSFetchRequest<LocalTodoTask> = LocalTodoTask.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id == %lld", Int64(task.id))
-            
-            do {
-                let results = try context.fetch(fetchRequest)
-                guard let localTask = results.first else {
-                    return
-                }
-
-                localTask.completed.toggle()
-
-                do {
-                    try context.save()
-                    
-                    let updatedTask = localTask.toTodoTask()
-                    
-                    DispatchQueue.main.async {
-                        self.presenter?.didToggleCompleted(updatedTask)
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.presenter?.didReceiveError("Failed to save task update")
-                    }
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self.presenter?.didReceiveError("Failed to fetch task")
-                }
+        dataStorage.toggleCompleted(task) { [weak self] result in
+            switch result {
+            case .success(let updatedTask):
+                self?.presenter?.didToggleCompleted(updatedTask)
+            case .failure(let error):
+                self?.presenter?.didReceiveError(error.localizedDescription)
             }
         }
     }
     
     func addNewTask() {
-        CoreDataStack.shared.performBackgroundTask { [weak self] context in
-            guard let self else { return }
-            
-            let newLocalTask = LocalTodoTask(context: context)
-            newLocalTask.id = Int64(UUID().hashValue)
-            newLocalTask.title = "New task"
-            newLocalTask.createdAt = Date()
-            newLocalTask.content = ""
-            newLocalTask.completed = false
-            
-            do {
-                try context.save()
-                
-                let newTask = newLocalTask.toTodoTask()
-                
-                DispatchQueue.main.async {
-                    self.presenter?.didAddNewTask(newTask)
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self.presenter?.didReceiveError(error.localizedDescription)
-                }
+        dataStorage.addNewTask { [weak self] result in
+            switch result {
+            case .success(let newTask):
+                self?.presenter?.didAddNewTask(newTask)
+            case .failure(let error):
+                self?.presenter?.didReceiveError(error.localizedDescription)
             }
         }
     }

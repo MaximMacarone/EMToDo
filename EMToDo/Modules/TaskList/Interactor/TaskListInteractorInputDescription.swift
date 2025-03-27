@@ -5,7 +5,7 @@
 //  Created by Maxim Makarenkov on 25.03.2025.
 //
 
-protocol TaskListInteractroInputDescription: AnyObject {
+protocol TaskListInteractorInputDescription: AnyObject {
     var presenter: TaskListInteractorOutputDescription? { get set }
     
     func fetchTasks()

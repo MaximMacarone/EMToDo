@@ -6,7 +6,7 @@
 //
 
 protocol TaskListPresenterDescription: AnyObject {
-    var interactor: TaskListInteractroInputDescription? { get set }
+    var interactor: TaskListInteractorInputDescription? { get set }
     var router: TaskListRouterDescription? { get set }
     var view: TaskListViewDescription? { get set }
     

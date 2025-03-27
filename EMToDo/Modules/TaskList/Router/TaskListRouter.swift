@@ -9,10 +9,11 @@ import UIKit
 
 final class TaskListRouter: TaskListRouterDescription {
     static func start() -> UIViewController {
+        
         let taskListVC = TaskListViewController()
         let taskListRouter = TaskListRouter()
         let taskListPresenter: TaskListPresenterDescription & TaskListInteractorOutputDescription = TaskListPresenter()
-        let taskListInteractor: TaskListInteractroInputDescription = TaskListInteractor()
+        let taskListInteractor: TaskListInteractorInputDescription = TaskListInteractor(dataStorage: TaskDataStore.shared)
         
         taskListPresenter.interactor = taskListInteractor
         taskListPresenter.router = taskListRouter
@@ -26,6 +27,7 @@ final class TaskListRouter: TaskListRouterDescription {
     }
     
     func presentTaskDetail(on view: any TaskListViewDescription, for task: TodoTask) {
+        
         let detailVC = TaskDetailRouter.start(with: task)
         
         guard let viewVC = view as? UIViewController else {
