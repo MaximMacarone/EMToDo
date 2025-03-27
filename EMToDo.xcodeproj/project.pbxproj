@@ -43,6 +43,7 @@
 		91010CBC2D9297A4005AE992 /* EMToDo */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (91010CE52D9297A6005AE992 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = EMToDo; sourceTree = "<group>"; };
 		91010CD62D9297A6005AE992 /* EMToDoTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = EMToDoTests; sourceTree = "<group>"; };
 		91010CE02D9297A6005AE992 /* EMToDoUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = EMToDoUITests; sourceTree = "<group>"; };
+		910110C22D961242005AE992 /* screenshots */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = screenshots; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +74,7 @@
 		91010CB12D9297A4005AE992 = {
 			isa = PBXGroup;
 			children = (
+				910110C22D961242005AE992 /* screenshots */,
 				91010CBC2D9297A4005AE992 /* EMToDo */,
 				91010CD62D9297A6005AE992 /* EMToDoTests */,
 				91010CE02D9297A6005AE992 /* EMToDoUITests */,
@@ -107,6 +109,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				91010CBC2D9297A4005AE992 /* EMToDo */,
+				910110C22D961242005AE992 /* screenshots */,
 			);
 			name = EMToDo;
 			packageProductDependencies = (
