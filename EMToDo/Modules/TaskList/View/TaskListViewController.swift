@@ -15,9 +15,9 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
     
     //MARK: - Subviews
     
-    let tableView = UITableView()
+    private let tableView = UITableView()
     
-    let taskCountLabel: UILabel = {
+    private let taskCountLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .footnote)
         label.textColor = .label
@@ -26,15 +26,27 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         return label
     }()
     
+    private let searchController = UISearchController(searchResultsController: nil)
+    
     //MARK: - Private fields
+    
+    private enum Section {
+        case main
+    }
     
     private var tasks: [TodoTask] = [] {
         didSet {
             DispatchQueue.main.async { [weak self] in
-                self?.tableView.reloadData()
-                self?.updateTaskCountLabel()
+                guard let self else { return }
+                self.updateTaskCountLabel()
             }
         }
+    }
+    
+    private var dataSource: UITableViewDiffableDataSource<Section, TodoTask>!
+    private var filteredTasks: [TodoTask] = []
+    private var isSearchActive: Bool {
+        return !(searchController.searchBar.text ?? "").isEmpty
     }
     
     //MARK: - Lifecycle
@@ -48,6 +60,11 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         setupBottomToolbar()
         setupSearchController()
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
         loadTasks()
     }
     
@@ -67,7 +84,18 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
     
     private func setupTableView() {
         tableView.delegate = self
-        tableView.dataSource = self
+        dataSource = UITableViewDiffableDataSource(tableView: tableView, cellProvider: { tableView, indexPath, item in
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: TaskTableViewCell.identifier, for: indexPath) as? TaskTableViewCell else {
+                fatalError()
+            }
+            
+            cell.delegate = self
+            cell.contextMenuDelegate = self
+            cell.configure(with: item)
+            
+            return cell
+        })
+        dataSource.defaultRowAnimation = .none
         
         tableView.register(TaskTableViewCell.self, forCellReuseIdentifier: TaskTableViewCell.identifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -99,7 +127,6 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
     }
     
     private func setupSearchController() {
-        let searchController = UISearchController()
         
         searchController.searchResultsUpdater = self
         searchController.searchBar.delegate = self
@@ -109,6 +136,7 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         searchController.searchBar.autocorrectionType = .no
         
         navigationItem.searchController = searchController
+        definesPresentationContext = true
     }
     
     //MARK: - Methods
@@ -121,8 +149,25 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         presenter?.addNewTask()
     }
     
-    func updateTableView(with tasks: [TodoTask]) {
+    func updateTasks(with tasks: [TodoTask]) {
         self.tasks = tasks
+        
+        if isSearchActive {
+            updateSearchResults(for: searchController)
+        } else {
+            updateTableViewItems(with: tasks)
+        }
+    }
+    
+    private func updateTableViewItems(with tasks: [TodoTask]) {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, TodoTask>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(tasks, toSection: .main)
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.dataSource.apply(snapshot, animatingDifferences: false)
+        }
     }
     
     func showError(message: String) {
@@ -130,6 +175,13 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         
         present(alert, animated: true)
+    }
+    
+    func toggleCompleted(_ task: TodoTask) {
+        guard let index = tasks.firstIndex(where: { $0.id == task.id}) else { return }
+        tasks[index] = task
+        
+        updateTasks(with: tasks)
     }
     
     private func loadTasks() {
@@ -147,7 +199,7 @@ extension TaskListViewController: UITableViewDelegate {
 
 extension TaskListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tasks.count
+        return isSearchActive ? filteredTasks.count : tasks.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -165,30 +217,49 @@ extension TaskListViewController: UITableViewDataSource {
 
 extension TaskListViewController: UISearchBarDelegate, UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
+        let searchText = searchController.searchBar.text?.lowercased() ?? ""
         
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            
+            let filteredTasks: [TodoTask]
+            
+            if searchText.isEmpty {
+                filteredTasks = tasks
+            } else {
+                filteredTasks = tasks.filter { task in
+                    task.title.lowercased().contains(searchText) ||
+                    task.description.lowercased().contains(searchText)
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.filteredTasks = filteredTasks
+                self.updateTableViewItems(with: filteredTasks)
+            }
+        }
     }
-    
-    
 }
 
 extension TaskListViewController: TaskTableViewCellDelegate {
     func didTapCheckbox(for cell: TaskTableViewCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        var task = tasks[indexPath.row]
+        let task = tasks[indexPath.row]
         
         presenter?.toggleCompleted(task)
 
-        task.completed.toggle()
-        tasks[indexPath.row] = task
-        
-        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 }
 
 extension TaskListViewController: TaskCellContextMenuDelegate {
     func didSelectEdit(for cell: TaskTableViewCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        let task = tasks[indexPath.row]
+        let task: TodoTask
+        if isSearchActive {
+            task = filteredTasks[indexPath.row]
+        } else {
+            task = tasks[indexPath.row]
+        }
         
         presenter?.didSelectTask(task)
     }
@@ -199,7 +270,7 @@ extension TaskListViewController: TaskCellContextMenuDelegate {
     
     func didSelectDelete(for cell: TaskTableViewCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        let task = tasks[indexPath.row]
+        let task: TodoTask = tasks[indexPath.row]
         
         let alert = UIAlertController(title: "Удалить задачу?", message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in

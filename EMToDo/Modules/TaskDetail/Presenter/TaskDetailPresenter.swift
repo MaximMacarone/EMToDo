@@ -28,5 +28,4 @@ extension TaskDetailPresenter: TaskDetailInteractorOutputDescription {
     func didEditTask(with id: Int) {
         
     }
-    
 }

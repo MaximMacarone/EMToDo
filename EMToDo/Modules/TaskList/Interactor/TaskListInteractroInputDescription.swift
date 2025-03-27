@@ -10,5 +10,6 @@ protocol TaskListInteractroInputDescription: AnyObject {
     
     func fetchTasks()
     func removeTask(_ task: TodoTask)
+    func addNewTask()
     func toggleCompleted(_ task: TodoTask)
 }

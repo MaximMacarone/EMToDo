@@ -27,10 +27,4 @@ final class TaskDetailRouter: TaskDetailRouterDescription {
         return detailVC
         
     }
-    
-    func navigateBack(from vc: any TaskDetailViewDescription) {
-        
-    }
-    
-    
 }

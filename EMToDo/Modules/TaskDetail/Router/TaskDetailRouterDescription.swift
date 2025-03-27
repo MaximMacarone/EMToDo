@@ -9,6 +9,4 @@ import UIKit
 
 protocol TaskDetailRouterDescription: AnyObject {
     static func start(with task: TodoTask) -> UIViewController
-    
-    func navigateBack(from vc: TaskDetailViewDescription)
 }
