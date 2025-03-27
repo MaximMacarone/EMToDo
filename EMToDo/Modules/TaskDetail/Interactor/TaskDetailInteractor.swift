@@ -19,6 +19,16 @@ final class TaskDetailInteractor: TaskDetailInteractorInputDescription {
     
     var todoTask: TodoTask?
     
+    private let dataStore: DataStoreDescription
+    
+    //MARK: - Init
+    
+    init(dataStore: DataStoreDescription) {
+        self.dataStore = dataStore
+    }
+    
+    //MARK: - Methods
+    
     func fetchTask() -> TodoTask {
         guard let task else {
             fatalError("Failed to fetch task")
@@ -28,26 +38,13 @@ final class TaskDetailInteractor: TaskDetailInteractorInputDescription {
     
     func editTask(title: String, content: String) {
         
-        CoreDataStack.shared.performBackgroundTask { [weak self] context in
-            guard let self else { return }
-            
-            let fetchRequest: NSFetchRequest<LocalTodoTask> = LocalTodoTask.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id == %lld", Int64(self.task?.id ?? 0))
-            
-            do {
-
-                let results = try context.fetch(fetchRequest)
-                if let localTask = results.first {
-
-                    localTask.title = title
-                    localTask.content = content
-
-                    try context.save()
-                } else {
-
-                }
-            } catch {
-                
+        dataStore.editTask(task!, title: title, content: content) { [weak self] result in
+            switch result {
+            case .success(let updatedTask):
+                self?.task = updatedTask
+                self?.presenter?.didEditTask()
+            case .failure(_):
+                self?.presenter?.didFailToEditTask()
             }
         }
     }

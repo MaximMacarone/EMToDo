@@ -5,10 +5,12 @@
 //  Created by Maxim Makarenkov on 26.03.2025.
 //
 
+import Foundation
+
 final class TaskListPresenter: TaskListPresenterDescription {
     
     //MARK: - VIPER
-    var interactor: (any TaskListInteractroInputDescription)?
+    var interactor: (any TaskListInteractorInputDescription)?
     
     var router: (any TaskListRouterDescription)?
     
@@ -43,7 +45,10 @@ extension TaskListPresenter: TaskListInteractorOutputDescription {
     func didAddNewTask(_ task: TodoTask) {
         guard let view else { return }
         
-        router?.presentTaskDetail(on: view, for: task)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.router?.presentTaskDetail(on: view, for: task)
+        }
     }
     
     func didRemoveTask() {

@@ -5,6 +5,8 @@
 //  Created by Maxim Makarenkov on 26.03.2025.
 //
 
+import Foundation
+
 final class TaskDetailPresenter: TaskDetailPresenterDescription {
     var interactor: (any TaskDetailInteractorInputDescription)?
     
@@ -25,7 +27,11 @@ final class TaskDetailPresenter: TaskDetailPresenterDescription {
 }
 
 extension TaskDetailPresenter: TaskDetailInteractorOutputDescription {
-    func didEditTask(with id: Int) {
+    func didEditTask() {
+        
+    }
+    
+    func didFailToEditTask() {
         
     }
 }

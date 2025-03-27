@@ -6,5 +6,6 @@
 //
 
 protocol TaskDetailInteractorOutputDescription: AnyObject {
-    func didEditTask(with id: Int)
+    func didEditTask()
+    func didFailToEditTask()
 }

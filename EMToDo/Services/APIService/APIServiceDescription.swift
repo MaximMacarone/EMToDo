@@ -7,7 +7,7 @@
 
 enum APIError: Error {
     case badURL
-    case fetchError(String)
+    case fetchError
     case badResponse
     case badData
     case badDecode
@@ -15,5 +15,8 @@ enum APIError: Error {
 
 protocol APIServiceDescription {
     func fetchTasks(completion: @escaping (Result<[TodoTask], APIError>) -> Void)
+}
+
+extension APIError: Equatable {
     
 }

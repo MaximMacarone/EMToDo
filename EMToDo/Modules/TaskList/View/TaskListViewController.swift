@@ -62,9 +62,8 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
         
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         loadTasks()
     }
     
@@ -152,10 +151,13 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
     func updateTasks(with tasks: [TodoTask]) {
         self.tasks = tasks
         
-        if isSearchActive {
-            updateSearchResults(for: searchController)
-        } else {
-            updateTableViewItems(with: tasks)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if self.isSearchActive {
+                self.updateSearchResults(for: searchController)
+            } else {
+                self.updateTableViewItems(with: tasks)
+            }
         }
     }
     
@@ -283,4 +285,15 @@ extension TaskListViewController: TaskCellContextMenuDelegate {
         present(alert, animated: true)
     }
     
+}
+
+//For tests
+extension TaskListViewController {
+    var getTasks: [TodoTask] {
+        return tasks
+    }
+    
+    var getTableView: UITableView {
+        return tableView
+    }
 }
