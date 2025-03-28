@@ -194,8 +194,14 @@ class TaskListViewController: UIViewController, TaskListViewDescription {
 extension TaskListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        let task: TodoTask
+        if isSearchActive {
+            task = filteredTasks[indexPath.row]
+        } else {
+            task = tasks[indexPath.row]
+        }
         
-        presenter?.didSelectTask(tasks[indexPath.row])
+        presenter?.didSelectTask(task)
     }
 }
 
@@ -246,7 +252,12 @@ extension TaskListViewController: UISearchBarDelegate, UISearchResultsUpdating {
 extension TaskListViewController: TaskTableViewCellDelegate {
     func didTapCheckbox(for cell: TaskTableViewCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        let task = tasks[indexPath.row]
+        let task: TodoTask
+        if isSearchActive {
+            task = filteredTasks[indexPath.row]
+        } else {
+            task = tasks[indexPath.row]
+        }
         
         presenter?.toggleCompleted(task)
 
@@ -272,7 +283,12 @@ extension TaskListViewController: TaskCellContextMenuDelegate {
     
     func didSelectDelete(for cell: TaskTableViewCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        let task: TodoTask = tasks[indexPath.row]
+        let task: TodoTask
+        if isSearchActive {
+            task = filteredTasks[indexPath.row]
+        } else {
+            task = tasks[indexPath.row]
+        }
         
         let alert = UIAlertController(title: "Удалить задачу?", message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
